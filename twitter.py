@@ -30,6 +30,7 @@ def main():
     url = create_url()
     headers, params = create_params()
     json_response = connect_to_endpoint(url, headers, params)
+    # paginationのハンドリングが必要
     print(json.dumps(json_response, indent=4, sort_keys=True))
 
 
