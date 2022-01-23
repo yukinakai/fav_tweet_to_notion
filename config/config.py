@@ -11,6 +11,9 @@ TWITTER_BEARER_TOKEN = os.getenv('TWITTER_BEARER_TOKEN')
 
 TWITTER_FIELDS_CONFIG = {
     'max_results': 5,
+    # 'start_time': '2019-01-01T17:00:00Z',
+    # 'end_time': '2020-12-12T01:00:00Z',
+    # 'pagination_token': '7140w',
     'expansions': 'attachments.media_keys,author_id',
     'tweet.fields': 'attachments,author_id,created_at,id,referenced_tweets,text',
     'user.fields': 'name,username,profile_image_url',

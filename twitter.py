@@ -8,12 +8,14 @@ def create_url():
     url = "https://api.twitter.com/2/users/{}/liked_tweets".format(id)
     return url
 
-def create_params():
+def create_params(pagination_token=None):
     bearer_token = config.TWITTER_BEARER_TOKEN
     headers = {
         'Authorization': f"Bearer {bearer_token}",
     }
     params = config.TWITTER_FIELDS_CONFIG
+    if pagination_token is not None:
+        params['pagination_token'] = pagination_token
     return headers, params
 
 def connect_to_endpoint(url, headers, params):
@@ -26,7 +28,6 @@ def connect_to_endpoint(url, headers, params):
         )
     return response.json()
 
-# データを整形するdefを定義する
 def format_data(json_response):
     users = dict()
     for user in json_response['includes']['users']:
@@ -35,10 +36,11 @@ def format_data(json_response):
         users[user_id] = user
 
     media = dict()
-    for file in json_response['includes']['media']:
-        media_key = file['media_key']
-        file.pop('media_key')
-        media[media_key] = file
+    if 'media' in json_response['includes']:
+        for file in json_response['includes']['media']:
+            media_key = file['media_key']
+            file.pop('media_key')
+            media[media_key] = file
 
     data = list()
     for datum in json_response['data']:
@@ -55,6 +57,7 @@ def format_data(json_response):
         row['author_profile_image_url'] = user_profiles['profile_image_url']
 
         if 'referenced_tweets' in datum:
+            ## 別途リツイート対応が必要
             row['referenced_tweets'] = datum['referenced_tweets']
         if 'attachments' in datum:
             for media_key in datum['attachments']['media_keys']:
@@ -68,11 +71,25 @@ def format_data(json_response):
 
 def main():
     url = create_url()
-    headers, params = create_params()
-    # # paginationのハンドリングが必要
-    json_response = connect_to_endpoint(url, headers, params)
-    data = format_data(json_response)
-    # print(json_response['meta'])
+    data = list()
+    pagination_token = None
+    result_count = 1
+    i = 0
+    while result_count > 0:
+        # Twitter APIから任意のデータを取得する
+        headers, params = create_params(pagination_token)
+        json_response = connect_to_endpoint(url, headers, params)
+        _data = format_data(json_response)
+        data = data + _data
+        # 次のループのために必要なデータを取得
+        pagination_token = json_response['meta']['next_token']
+        result_count = json_response['meta']['result_count']
+        # テスト用
+        i = i + 1
+        if i == 2:
+            break
+    return data
+
 
 
 if __name__ == "__main__":
