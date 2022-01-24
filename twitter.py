@@ -60,12 +60,15 @@ def format_data(json_response):
             ## 別途リツイート対応が必要
             row['referenced_tweets'] = datum['referenced_tweets']
         if 'attachments' in datum:
+            media_url_list = list()
             for media_key in datum['attachments']['media_keys']:
                 try:
-                    row['attached_media_url'] = media[media_key]['url']
+                    attached_media_url =  media[media_key]['url']
                 except:
                     ## 別途動画対応が必要
-                    row['attached_media_url'] = 'video'
+                    attached_media_url = 'video'
+                media_url_list.append(attached_media_url)
+            row['attached_media_url'] = media_url_list
         data.append(row)
     return data
 
@@ -89,7 +92,6 @@ def main():
         if i == 2:
             break
     return data
-
 
 
 if __name__ == "__main__":

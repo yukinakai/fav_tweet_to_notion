@@ -1,6 +1,8 @@
 import requests
 import json
 from config import config
+import twitter
+import sys
 
 
 def create_url():
@@ -16,22 +18,93 @@ def create_params():
     }
     return headers
 
-def create_data():
-    database_id = config.NOTION_DATABASE_ID
+def body_params_create_block_external_image(url):
+    return {'object': 'block',
+            'type': 'image',
+            'image': {
+                'type': 'external',
+                'external': {
+                    'url': url
+                }
+            }
+            }
+
+def body_params_create_block_external_video(url):
+    return {'object': 'block',
+            'type': 'heading_2',
+            'heading_2': {
+                'text': [{'type': 'text', 'text': {'content': url}}]
+            }
+            }
+
+def body_params_create_page(data):
     return {
-        'parent': {'database_id': database_id},
+        'icon': {
+            'external': {
+                'url': data['author_profile_image_url']
+            }
+        },
         'properties': {
-            'Name': {
+            'ID': {
                 'title': [
                     {
                         'text': {
-                            'content': 'created by API'
+                            'content': data['tweet_id']
                         }
                     }
                 ]
-            }
+            },
+            'Tweeted_at': {
+                'date': {'start': data['tweeted_at']}
+            },
+            'URL': {
+                'url': "https://twitter.com/{author_id}/status/{tweet_id}".format(author_id=data['author_id'],tweet_id=data['tweet_id'])
+            },
+            'Text': {
+                "rich_text": [
+                    {
+                        "text": {
+                            "content": data['text']
+                        }
+                    }
+                ]
+            },
+            'Author_name': {
+                "rich_text": [
+                    {
+                        "text": {
+                            "content": data['author_name']
+                        }
+                    }
+                ]
+            },
+            'Author_username': {
+                "rich_text": [
+                    {
+                        "text": {
+                            "content": data['author_username']
+                        }
+                    }
+                ]
+            },
         }
     }
+
+def format_data(data):
+    database_id = config.NOTION_DATABASE_ID
+    body_params = body_params_create_page(data)
+    body_params['parent'] = {'database_id': database_id}
+
+    children = list()
+    if 'attached_media_url' in data:
+        for media_url in data['attached_media_url']:
+            if media_url == 'video':
+                children.append(body_params_create_block_external_video(media_url))
+            else:
+                children.append(body_params_create_block_external_image(media_url))
+    body_params['children'] = children
+
+    return body_params
 
 def connect_to_endpoint(url, headers, data):
     response = requests.post(url, headers=headers, data=json.dumps(data))
@@ -46,10 +119,11 @@ def connect_to_endpoint(url, headers, data):
 def main():
     url = create_url()
     headers = create_params()
-    data = create_data()
-    json_response = connect_to_endpoint(url, headers, data)
-    # paginationのハンドリングが必要
-    print(json.dumps(json_response, indent=4, sort_keys=True))
+    data = twitter.main()
+    for datum in data:
+        body_params = format_data(datum)
+        json_response = connect_to_endpoint(url, headers, body_params)
+        print(json.dumps(json_response, indent=4, sort_keys=True))
 
 
 if __name__ == "__main__":
