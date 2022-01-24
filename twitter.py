@@ -42,6 +42,13 @@ def format_data(json_response):
             file.pop('media_key')
             media[media_key] = file
 
+    tweets = dict()
+    if 'tweets' in json_response['includes']:
+        for tweet in json_response['includes']['tweets']:
+            tweet_id =  tweet['id']
+            tweet.pop('id')
+            tweets[tweet_id] = tweet
+
     data = list()
     for datum in json_response['data']:
         row = dict()
@@ -60,15 +67,22 @@ def format_data(json_response):
             ## 別途リツイート対応が必要
             row['referenced_tweets'] = datum['referenced_tweets']
         if 'attachments' in datum:
-            media_url_list = list()
+            attachments = list()
             for media_key in datum['attachments']['media_keys']:
                 try:
                     attached_media_url =  media[media_key]['url']
                 except:
                     ## 別途動画対応が必要
                     attached_media_url = 'video'
-                media_url_list.append(attached_media_url)
-            row['attached_media_url'] = media_url_list
+                attachments.append(attached_media_url)
+            row['attached_media_url'] = attachments
+        if 'referenced_tweets' in datum:
+            referenced_tweets = list()
+            for referenced_tweet in datum['referenced_tweets']:
+                tweet_id = referenced_tweet['id']
+                author_id = tweets[tweet_id]['author_id']
+                referenced_tweets.append('https://twitter.com/{author_id}/status/{tweet_id}'.format(author_id=author_id,tweet_id=tweet_id))
+            row['referenced_tweets'] = referenced_tweets
         data.append(row)
     return data
 
