@@ -18,7 +18,7 @@ headers = {
 
 
 
-block_id = "4c6aaaa6542142e3a0e75c73c5cc5f79"
+block_id = "d69b3e4baae24f13857ce41078e3e6e8"
 url = "https://api.notion.com/v1/blocks/{}".format(block_id)
 response = requests.request("GET", url, headers=headers)
 

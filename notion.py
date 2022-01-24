@@ -9,7 +9,7 @@ def create_url():
     url = "https://api.notion.com/v1/pages"
     return url
 
-def create_params():
+def create_header():
     NOTION_API_KEY = config.NOTION_API_KEY
     headers = {
         'Authorization': f"Bearer {NOTION_API_KEY}",
@@ -37,6 +37,14 @@ def body_params_create_block_external_video(url):
             }
             }
 
+def body_params_create_block_embed(url):
+    return {'object': 'block',
+            'type': 'embed',
+            'embed': {
+                'url': url
+            }
+            }
+
 def body_params_create_page(data):
     return {
         'icon': {
@@ -49,7 +57,7 @@ def body_params_create_page(data):
                 'title': [
                     {
                         'text': {
-                            'content': data['tweet_id']
+                            'content': data['author_name']
                         }
                     }
                 ]
@@ -69,20 +77,20 @@ def body_params_create_page(data):
                     }
                 ]
             },
-            'Author_name': {
-                "rich_text": [
-                    {
-                        "text": {
-                            "content": data['author_name']
-                        }
-                    }
-                ]
-            },
             'Author_username': {
                 "rich_text": [
                     {
                         "text": {
                             "content": data['author_username']
+                        }
+                    }
+                ]
+            },
+            'Tweet_id': {
+                "rich_text": [
+                    {
+                        "text": {
+                            "content": data['tweet_id']
                         }
                     }
                 ]
@@ -102,6 +110,9 @@ def format_data(data):
                 children.append(body_params_create_block_external_video(media_url))
             else:
                 children.append(body_params_create_block_external_image(media_url))
+    if 'referenced_tweets' in data:
+        for referenced_tweet in data['referenced_tweets']:
+            children.append(body_params_create_block_embed(referenced_tweet))
     body_params['children'] = children
 
     return body_params
@@ -118,7 +129,7 @@ def connect_to_endpoint(url, headers, data):
 
 def main():
     url = create_url()
-    headers = create_params()
+    headers = create_header()
     data = twitter.main()
     for datum in data:
         body_params = format_data(datum)
