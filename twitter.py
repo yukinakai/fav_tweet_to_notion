@@ -1,7 +1,9 @@
 import requests
 import json
 from config import config
+from models import tweet_params
 
+tweet_params = tweet_params.Tweet()
 
 def create_url():
     id = config.TWITTER_USER_ID
@@ -13,7 +15,7 @@ def create_params(pagination_token=None):
     headers = {
         'Authorization': f"Bearer {bearer_token}",
     }
-    params = config.TWITTER_FIELDS_CONFIG
+    params = tweet_params.tweet_fields_config()
     if pagination_token is not None:
         params['pagination_token'] = pagination_token
     return headers, params
@@ -64,8 +66,12 @@ def format_data(json_response):
         row['author_profile_image_url'] = user_profiles['profile_image_url']
 
         if 'referenced_tweets' in datum:
-            ## 別途リツイート対応が必要
-            row['referenced_tweets'] = datum['referenced_tweets']
+            referenced_tweets = list()
+            for referenced_tweet in datum['referenced_tweets']:
+                tweet_id = referenced_tweet['id']
+                author_id = tweets[tweet_id]['author_id']
+                referenced_tweets.append('https://twitter.com/{author_id}/status/{tweet_id}'.format(author_id=author_id,tweet_id=tweet_id))
+            row['referenced_tweets'] = referenced_tweets
         if 'attachments' in datum:
             attachments = list()
             for media_key in datum['attachments']['media_keys']:
@@ -76,13 +82,7 @@ def format_data(json_response):
                     attached_media_url = 'video'
                 attachments.append(attached_media_url)
             row['attached_media_url'] = attachments
-        if 'referenced_tweets' in datum:
-            referenced_tweets = list()
-            for referenced_tweet in datum['referenced_tweets']:
-                tweet_id = referenced_tweet['id']
-                author_id = tweets[tweet_id]['author_id']
-                referenced_tweets.append('https://twitter.com/{author_id}/status/{tweet_id}'.format(author_id=author_id,tweet_id=tweet_id))
-            row['referenced_tweets'] = referenced_tweets
+
         data.append(row)
     return data
 

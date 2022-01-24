@@ -3,7 +3,9 @@ import json
 from config import config
 import twitter
 import sys
+from models import notion_params
 
+notion_page_prams = notion_params.NotionPage()
 
 def create_url():
     url = "https://api.notion.com/v1/pages"
@@ -18,89 +20,9 @@ def create_header():
     }
     return headers
 
-def body_params_create_block_external_image(url):
-    return {'object': 'block',
-            'type': 'image',
-            'image': {
-                'type': 'external',
-                'external': {
-                    'url': url
-                }
-            }
-            }
-
-def body_params_create_block_external_video(url):
-    return {'object': 'block',
-            'type': 'heading_2',
-            'heading_2': {
-                'text': [{'type': 'text', 'text': {'content': url}}]
-            }
-            }
-
-def body_params_create_block_embed(url):
-    return {'object': 'block',
-            'type': 'embed',
-            'embed': {
-                'url': url
-            }
-            }
-
-def body_params_create_page(data):
-    return {
-        'icon': {
-            'external': {
-                'url': data['author_profile_image_url']
-            }
-        },
-        'properties': {
-            'ID': {
-                'title': [
-                    {
-                        'text': {
-                            'content': data['author_name']
-                        }
-                    }
-                ]
-            },
-            'Tweeted_at': {
-                'date': {'start': data['tweeted_at']}
-            },
-            'URL': {
-                'url': "https://twitter.com/{author_id}/status/{tweet_id}".format(author_id=data['author_id'],tweet_id=data['tweet_id'])
-            },
-            'Text': {
-                "rich_text": [
-                    {
-                        "text": {
-                            "content": data['text']
-                        }
-                    }
-                ]
-            },
-            'Author_username': {
-                "rich_text": [
-                    {
-                        "text": {
-                            "content": data['author_username']
-                        }
-                    }
-                ]
-            },
-            'Tweet_id': {
-                "rich_text": [
-                    {
-                        "text": {
-                            "content": data['tweet_id']
-                        }
-                    }
-                ]
-            },
-        }
-    }
-
 def format_data(data):
     database_id = config.NOTION_DATABASE_ID
-    body_params = body_params_create_page(data)
+    body_params = notion_page_prams.page(data)
     body_params['parent'] = {'database_id': database_id}
 
     children = list()
@@ -108,12 +30,12 @@ def format_data(data):
         body_params['properties']['With_media'] = {"type": "checkbox", "checkbox": True}
         for media_url in data['attached_media_url']:
             if media_url == 'video':
-                children.append(body_params_create_block_external_video(media_url))
+                children.append(notion_page_prams.child_external_video(media_url))
             else:
-                children.append(body_params_create_block_external_image(media_url))
+                children.append(notion_page_prams.child_external_image(media_url))
     if 'referenced_tweets' in data:
         for referenced_tweet in data['referenced_tweets']:
-            children.append(body_params_create_block_embed(referenced_tweet))
+            children.append(notion_page_prams.child_embed(referenced_tweet))
     body_params['children'] = children
 
     return body_params
