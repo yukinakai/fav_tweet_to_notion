@@ -105,6 +105,7 @@ def format_data(data):
 
     children = list()
     if 'attached_media_url' in data:
+        body_params['properties']['With_media'] = {"type": "checkbox", "checkbox": True}
         for media_url in data['attached_media_url']:
             if media_url == 'video':
                 children.append(body_params_create_block_external_video(media_url))
