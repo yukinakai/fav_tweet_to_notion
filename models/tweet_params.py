@@ -6,7 +6,7 @@ class Tweet:
             # 'end_time': '2020-12-12T01:00:00Z',
             # 'pagination_token': '7140w',
             'expansions': 'attachments.media_keys,author_id,referenced_tweets.id,referenced_tweets.id.author_id',
-            'tweet.fields': 'attachments,author_id,created_at,id,text,referenced_tweets',
+            'tweet.fields': 'attachments,author_id,created_at,id,text,referenced_tweets,entities',
             'user.fields': 'name,username,profile_image_url',
             'media.fields': 'url'
         }

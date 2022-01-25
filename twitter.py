@@ -78,7 +78,7 @@ def format_data(json_response):
                 try:
                     attached_media_url =  media[media_key]['url']
                 except:
-                    ## 別途動画対応が必要
+                    ## temp code
                     attached_media_url = 'video'
                 attachments.append(attached_media_url)
             row['attached_media_url'] = attachments
@@ -93,12 +93,12 @@ def main():
     result_count = 1
     i = 0
     while result_count > 0:
-        # Twitter APIから任意のデータを取得する
+        # get tweet data via twitter api
         headers, params = create_params(pagination_token)
         json_response = connect_to_endpoint(url, headers, params)
         _data = format_data(json_response)
         data = data + _data
-        # 次のループのために必要なデータを取得
+        # set token for next loop
         pagination_token = json_response['meta']['next_token']
         result_count = json_response['meta']['result_count']
         # テスト用
