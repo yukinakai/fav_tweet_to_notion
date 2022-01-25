@@ -2,7 +2,6 @@ import requests
 import json
 from config import config
 import twitter
-import sys
 from models import notion_params
 
 notion_page_prams = notion_params.NotionPage()
@@ -46,7 +45,8 @@ def connect_to_endpoint(url, headers, data):
         )
     return response.json()
 
-def get_tweets_in_notion(headers):
+def get_tweets_in_notion():
+    headers = create_header()
     url = "https://api.notion.com/v1/databases/{}/query".format(NOTION_DATABASE_ID)
     payload = {"page_size": 5}
     has_more = True
@@ -60,23 +60,12 @@ def get_tweets_in_notion(headers):
     tweets_in_notion = list(set(tweets_in_notion))
     return tweets_in_notion
 
-def create_page_on_notion(headers, data):
+def main(data):
+    headers = create_header()
     url = "https://api.notion.com/v1/pages"
     body_params = format_data(data)
     json_response = connect_to_endpoint(url, headers, body_params)
     return json_response
-
-def main():
-    headers = create_header()
-    # get tweet_id in notion
-    tweets_in_notion = get_tweets_in_notion(headers)
-    # create page on notion
-    data = twitter.main()
-    for datum in data:
-        if datum['tweet_id'] in tweets_in_notion:
-            continue
-        json_response = create_page_on_notion(headers, datum)
-        print(json.dumps(json_response, indent=4, sort_keys=True))
 
 
 if __name__ == "__main__":
