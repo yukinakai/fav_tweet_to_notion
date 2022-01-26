@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import logging
+import logging.handlers
 load_dotenv()
 
 # Twitter
@@ -20,7 +21,11 @@ def logging_config():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-    handler = logging.FileHandler('config/logs.log')
+    handler = logging.handlers.RotatingFileHandler(
+        filename='config/logs.log',
+        maxBytes=100000,
+        backupCount=3
+    )
     fmt = logging.Formatter(
         '%(asctime)s:' \
         '%(levelname)s:' \

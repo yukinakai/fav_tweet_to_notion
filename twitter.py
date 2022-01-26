@@ -121,6 +121,7 @@ def main():
         data = data + _data
         # set token for next loop
         pagination_token = json_response['meta']['next_token']
+        break # need to delete to get more than 100 tweet
     return data
 
 
