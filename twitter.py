@@ -98,7 +98,6 @@ def main():
     data = list()
     pagination_token = None
     result_count = 1
-    i = 0
     while result_count > 0:
         # get tweet data via twitter api
         headers, params = create_params(pagination_token)
@@ -108,10 +107,6 @@ def main():
         # set token for next loop
         pagination_token = json_response['meta']['next_token']
         result_count = json_response['meta']['result_count']
-        # テスト用
-        i = i + 1
-        if i == 2:
-            break
     return data
 
 
