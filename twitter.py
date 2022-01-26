@@ -1,13 +1,12 @@
 import requests
-import json
 from config import config
 from models import tweet_params
+logger = config.logging_config()
 
 tweet_params = tweet_params.Tweet()
-
 def create_url():
-    id = config.TWITTER_USER_ID
-    url = "https://api.twitter.com/2/users/{}/liked_tweets".format(id)
+    user_id = config.TWITTER_USER_ID
+    url = "https://api.twitter.com/2/users/{}/liked_tweets".format(user_id)
     return url
 
 def create_params(pagination_token=None):
@@ -23,6 +22,14 @@ def create_params(pagination_token=None):
 def connect_to_endpoint(url, headers, params):
     response = requests.get(url, headers=headers, params=params)
     if response.status_code != 200:
+        logger.error(
+            {
+                'action': 'post notion endpoint',
+                'statud_code': response.status_code,
+                'message': response.text,
+                'data': params
+            }
+        )
         raise Exception(
             "Request returned an error: {} {}".format(
                 response.status_code, response.text

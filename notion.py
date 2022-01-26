@@ -1,8 +1,8 @@
 import requests
 import json
 from config import config
-import twitter
 from models import notion_params
+logger = config.logging_config()
 
 notion_page_prams = notion_params.NotionPage()
 NOTION_DATABASE_ID = config.NOTION_DATABASE_ID
@@ -38,6 +38,14 @@ def format_data(data):
 def connect_to_endpoint(url, headers, data):
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code != 200:
+        logger.error(
+            {
+                'action': 'post notion endpoint',
+                'statud_code': response.status_code,
+                'message': response.text,
+                'data': data
+            }
+        )
         raise Exception(
             "Request returned an error: {} {}".format(
                 response.status_code, response.text
