@@ -21,19 +21,23 @@ def logging_config():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-    handler = logging.handlers.RotatingFileHandler(
-        filename='config/logs.log',
-        maxBytes=100000,
-        backupCount=3
-    )
-    fmt = logging.Formatter(
-        '%(asctime)s:' \
-        '%(levelname)s:' \
-        '%(filename)s:' \
-        '%(lineno)s:' \
-        '%(message)s'
-    )
-    handler.setFormatter(fmt)
-    logger.addHandler(handler)
+    if not logger.hasHandlers():
+        handler = logging.handlers.RotatingFileHandler(
+            filename='config/logs.log',
+            maxBytes=100000,
+            backupCount=3
+        )
+        fmt = logging.Formatter(
+            '%(asctime)s:' \
+            '%(levelname)s:' \
+            '%(filename)s:' \
+            '%(lineno)s:' \
+            '%(message)s'
+        )
+        handler.setFormatter(fmt)
+        logger.addHandler(handler)
 
     return logger
+
+if __name__ == "__main__":
+    logging_config()
