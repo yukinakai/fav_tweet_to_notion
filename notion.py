@@ -56,7 +56,7 @@ def connect_to_endpoint(url, headers, data):
 def get_tweets_in_notion():
     headers = create_header()
     url = "https://api.notion.com/v1/databases/{}/query".format(NOTION_DATABASE_ID)
-    payload = {"page_size": 5}
+    payload = {"page_size": 100}
     has_more = True
     tweets_in_notion = list()
     while has_more:
