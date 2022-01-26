@@ -1,4 +1,5 @@
 import requests
+import sys
 from config import config
 from models import tweet_params
 logger = config.logging_config()
@@ -102,11 +103,24 @@ def main():
         # get tweet data via twitter api
         headers, params = create_params(pagination_token)
         json_response = connect_to_endpoint(url, headers, params)
-        _data = format_data(json_response)
+        result_count = json_response['meta']['result_count']
+        # formatting data
+        if result_count == 0:
+            break
+        try:
+            _data = format_data(json_response)
+        except KeyError as e:
+            logger.error({
+                'error': 'KeyError',
+                'key': e,
+                'url': url,
+                'params': params,
+                'data': json_response
+            })
+            sys.exit()
         data = data + _data
         # set token for next loop
         pagination_token = json_response['meta']['next_token']
-        result_count = json_response['meta']['result_count']
     return data
 
 
