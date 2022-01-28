@@ -22,11 +22,6 @@ def logging_config():
     logger.setLevel(logging.DEBUG)
 
     if not logger.hasHandlers():
-        handler = logging.handlers.RotatingFileHandler(
-            filename='config/logs.log',
-            maxBytes=100000,
-            backupCount=3
-        )
         fmt = logging.Formatter(
             '%(asctime)s:' \
             '%(levelname)s:' \
@@ -34,8 +29,18 @@ def logging_config():
             '%(lineno)s:' \
             '%(message)s'
         )
+        handler = logging.handlers.RotatingFileHandler(
+            filename='config/logs.log',
+            maxBytes=100000,
+            backupCount=3
+        )
         handler.setFormatter(fmt)
         logger.addHandler(handler)
+
+        handler = logging.StreamHandler()
+        handler.setFormatter(fmt)
+        logger.addHandler(handler)
+
 
     return logger
 
