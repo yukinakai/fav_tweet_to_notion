@@ -25,6 +25,7 @@ def format_data(data):
         body_params['properties']['With_media'] = {"type": "checkbox", "checkbox": True}
         for media_url in data['attached_media_url']:
             if media_url == 'video':
+                body_params['properties']['Video'] = {"type": "select", "select": {"name": "未対応"}}
                 children.append(notion_page_prams.child_external_video(media_url))
             else:
                 children.append(notion_page_prams.child_external_image(media_url))
